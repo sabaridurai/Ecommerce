@@ -366,7 +366,7 @@ const NAV = [
     section: "Main",
     items: [
       { to: "/admin/dashboard", icon: "🏠", label: "Dashboard", badge: null },
-      { to: "/admin/analytics", icon: "📊", label: "Analytics",  badge: null },
+    //   { to: "/admin/analytics", icon: "📊", label: "Analytics",  badge: null },
     ],
   },
   {
@@ -381,7 +381,7 @@ const NAV = [
     section: "Finance",
     items: [
       { to: "/admin/payments",  icon: "💳", label: "Payments",  badge: "3", badgeType: "red" },
-      { to: "/admin/orders",    icon: "🧾", label: "Orders",    badge: "12", badgeType: "green" },
+    //   { to: "/admin/orders",    icon: "🧾", label: "Orders",    badge: "12", badgeType: "green" },
     //   { to: "/admin/refunds",   icon: "↩️",  label: "Refunds",   badge: null },
     ],
   },
@@ -412,7 +412,7 @@ export default function Sidebar() {
            onClick={() => setCollapsed(v => !v)}
            >🌐</div>
           {!collapsed && (
-            <div className="sb-brand-text">
+            <div className="sb-brand-text"  onClick={() => setCollapsed(v => !v)}>
               <div className="sb-brand-name">Admin</div>
               <div className="sb-brand-tag">Control Center</div>
             </div>

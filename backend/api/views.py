@@ -14,9 +14,14 @@ from rest_framework import status
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
+# For product api
+from .models import Product, ProductImage, ProductVideo
+from .serializers import ProductSerializer
+
 
 # me api
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 class RegisterView(generics.CreateAPIView):
@@ -68,6 +73,7 @@ class MeView(APIView):
         })
 
 class AdminLoginView(APIView):
+    permission_classes = [AllowAny]   
 
     def post(self, request):
 
@@ -98,3 +104,83 @@ class AdminLoginView(APIView):
             "refresh": str(refresh),
             "role": user.role
         })
+    
+class ProductCreateView(APIView):
+
+    def post(self, request):
+
+        data = request.data
+
+        product = Product.objects.create(
+            name=data.get("name"),
+            description=data.get("description"),
+            price=data.get("price"),
+            category=data.get("category"),
+            stock=data.get("stock"),
+        )
+
+        # IMAGES
+        images = request.FILES.getlist("images")
+        for img in images:
+            ProductImage.objects.create(product=product, image=img)
+
+        # VIDEOS
+        videos = request.FILES.getlist("videos")
+        for vid in videos:
+            ProductVideo.objects.create(product=product, video=vid)
+
+        return Response({"message": "Product created successfully"})
+
+
+class ProductListView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+
+    def get(self, request):
+       
+        print("META AUTH:", request.META.get("HTTP_AUTHORIZATION"))
+        print("USER:", request.user)
+        print("AUTH:", request.auth)
+        products = Product.objects.all()
+
+        data = []
+
+        for p in products:
+            data.append({
+                "id": p.id,
+                "name": p.name,
+                "price": p.price,
+                "category": p.category,
+                "stock": p.stock,
+
+                # 👇 IMPORTANT (images fix)
+                "images": [img.image.url for img in p.images.all()],
+                "videos": [v.video.url for v in p.videos.all()],
+            })
+
+        return Response(data)
+    
+
+
+ 
+class ProductDetailView(APIView):
+
+    # UPDATE
+    def put(self, request, id):
+        product = Product.objects.get(id=id)
+
+        product.name = request.data.get("name")
+        product.description = request.data.get("description")
+        product.price = request.data.get("price")
+        product.category = request.data.get("category")
+        product.stock = request.data.get("stock")
+        product.save()
+
+        return Response({"message": "updated"})
+
+    # DELETE
+    def delete(self, request, id):
+        product = Product.objects.get(id=id)
+        product.delete()
+        return Response({"message": "deleted"})   

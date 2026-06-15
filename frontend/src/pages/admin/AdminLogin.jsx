@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 import { setAuth } from "../../utils/auth";
+import { getErrorMessage } from "../../utils/errorHandler";
 import { useNavigate } from "react-router-dom";
 
 const css = `
@@ -645,36 +646,43 @@ export default function AdminLogin() {
 
   useEffect(() => { setMounted(true); }, []);
 
-  const login = async (e) => {
-    e.preventDefault();
-    setError("");
-    if (!username.trim() || !password) {
-      setError("Please enter both username and password.");
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await axios.post(
-        "http://localhost:8000/auth/admin-login/",
-        { username, password }
-      );
-     //  centralized auth
-     setAuth(res.data);
 
-     // 🚀 role-based redirect
-    if (res.data.role === "admin") {
-    navigate("/admin/dashboard");
+  const navigate = useNavigate();
+const login = async (e) => {
+  e.preventDefault();
+  setError("");
+
+  if (!username.trim() || !password) {
+    setError("Please enter both username and password.");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const res = await axios.post(
+      "http://localhost:8000/auth/admin-login/",
+      { username, password }
+    );
+
+    console.log("Login successful:", res.data);
+
+    setAuth(res.data);
+
+    if (res.data.role === 'ADMIN') {
+      navigate("/admin/dashboard");
     } else {
-    navigate("/login");
-   }
-
-      // window.location.href = "/admin/dashboard";
-    } catch (err) {
-      setError(err.response?.data?.message || "Invalid credentials. Please try again.");
-    } finally {
-      setLoading(false);
+      navigate("/login");
     }
-  };
+
+  } catch (err) {
+  console.log("FULL ERROR:", err);
+  console.log("RESPONSE:", err.response);
+  setError(getErrorMessage(err));
+} finally {
+    setLoading(false);
+  }
+};
 
   return (
     <>
