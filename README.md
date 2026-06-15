@@ -30,7 +30,10 @@ This project is a full-stack application built using:
 - Django
 - Django REST Framework
 - SimpleJWT Authentication
+---
 
+create Database
+MySQL Database "ecommerce"
 ---
 
 # 📦 Setup Instructions
