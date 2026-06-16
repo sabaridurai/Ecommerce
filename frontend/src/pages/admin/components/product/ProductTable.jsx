@@ -1,4 +1,4 @@
-import {backendURL} from "../services/api";
+import {backendURL} from "../../../../services/api";
 
 export default function ProductTable({ products, onEdit, onDelete, onView }) {
 
@@ -29,11 +29,7 @@ export default function ProductTable({ products, onEdit, onDelete, onView }) {
                 <td style={styles.td}>
                     
                 <img
-  src={
-    p.images?.[0]
-      ? `${backendURL}${p.images[0]}`
-      : "https://via.placeholder.com/60"
-  }
+  src={p.images?.[0]? `${backendURL}${p.images[0]}` : "https://via.placeholder.com/60"}
   alt="product"
   style={styles.image}
 />
@@ -49,17 +45,19 @@ export default function ProductTable({ products, onEdit, onDelete, onView }) {
                 <td style={styles.td}>{p.category}</td>
 
                 {/* STOCK BADGE */}
-                <td style={styles.td}>
-                  <span
-                    style={{
-                      ...styles.badge,
-                      background: p.stock > 0 ? "#dcfce7" : "#fee2e2",
-                      color: p.stock > 0 ? "#16a34a" : "#dc2626",
-                    }}
-                  >
-                    {p.stock > 0 ? "In Stock" : "Out of Stock"}
-                  </span>
-                </td>
+               <td style={styles.td}>
+  <span
+    style={{
+      ...styles.badge,
+      background: p.stock > 0 ? "#dcfce7" : "#fee2e2",
+      color: p.stock > 0 ? "#16a34a" : "#dc2626",
+    }}
+  >
+    {p.stock > 0
+      ? `In Stock (${p.stock})`
+      : `Out of Stock (${p.stock})`}
+  </span>
+</td>
 
                 {/* ACTIONS */}
                 <td style={styles.td}>

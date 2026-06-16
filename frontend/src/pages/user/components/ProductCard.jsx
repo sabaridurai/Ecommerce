@@ -1,243 +1,966 @@
-import { useState } from "react";
-import "./ProductCard.css";
-import { backendURL } from "../../admin/services/api";
+import { useCart } from "../../../context/CartContext";
+import { backendURL } from "../../../services/api";
+import { useState, useEffect, useRef } from "react";
+  import { useNavigate } from "react-router-dom";
+import { isLoggedIn } from "@/utils/auth";
+// Styles object - Unified Glass Theme
+const styles = {
+  card: {
+    background: "#f8fafc",
+    borderRadius: "14px",
+    border: "1px solid #e2e8f0",
+    boxShadow: "0 4px 12px rgba(15, 23, 42, 0.06)",
+    transition: "all 0.25s ease",
+    display: "flex",
+    flexDirection: "column",
+    cursor: "pointer",
+    overflow: "hidden",
+  },
+  cardHover: {
+    transform: "translateY(-6px)",
+    boxShadow: "0 12px 24px rgba(15, 23, 42, 0.12)",
+    borderColor: "#cbd5f5",
+  },
+  imageContainer: {
+    position: "relative",
+    paddingTop: "75%",
+    overflow: "hidden",
+    background: "rgba(255, 255, 255, 0.03)",
+    borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
+  },
+  mediaWrapper: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    overflow: "hidden",
+  },
+  mediaSlide: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    transition: "transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.6s ease",
+    opacity: 0,
+    transform: "scale(1.05)",
+  },
+  mediaSlideActive: {
+    opacity: 1,
+    transform: "scale(1)",
+  },
+  mediaSlideExit: {
+    opacity: 0,
+    transform: "scale(0.95)",
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    transition: "transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+  },
+  imageHover: {
+    transform: "scale(1.08)",
+  },
+  video: {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+  },
+  imagePlaceholder: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    fontSize: "48px",
+    opacity: 0.3,
+  },
+  // Media indicators - dots
+  mediaDots: {
+    position: "absolute",
+    bottom: "12px",
+    left: "50%",
+    transform: "translateX(-50%)",
+    display: "flex",
+    gap: "6px",
+    zIndex: 3,
+    background: "rgba(0,0,0,0.3)",
+    padding: "6px 12px",
+    borderRadius: "20px",
+    backdropFilter: "blur(8px)",
+    WebkitBackdropFilter: "blur(8px)",
+  },
+  dot: {
+    width: "8px",
+    height: "8px",
+    borderRadius: "50%",
+    background: "rgba(255,255,255,0.3)",
+    border: "none",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    padding: 0,
+  },
+  dotActive: {
+    background: "#667eea",
+    transform: "scale(1.3)",
+    boxShadow: "0 0 20px rgba(102, 126, 234, 0.4)",
+  },
+  dotHover: {
+    background: "rgba(255,255,255,0.6)",
+    transform: "scale(1.1)",
+  },
+  // Media type indicator
+  mediaTypeBadge: {
+    position: "absolute",
+    top: "12px",
+    left: "12px",
+    padding: "4px 12px",
+    borderRadius: "20px",
+    fontSize: "11px",
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
+    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.2)",
+    zIndex: 2,
+    background: "rgba(102, 126, 234, 0.2)",
+    color: "#a8b5ff",
+    border: "1px solid rgba(102, 126, 234, 0.15)",
+  },
+  // Navigation arrows
+  navArrow: {
+    position: "absolute",
+    top: "50%",
+    transform: "translateY(-50%)",
+    width: "36px",
+    height: "36px",
+    borderRadius: "50%",
+    background: "rgba(0,0,0,0.4)",
+    backdropFilter: "blur(8px)",
+    WebkitBackdropFilter: "blur(8px)",
+    border: "1px solid rgba(255,255,255,0.1)",
+    color: "#fff",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "18px",
+    transition: "all 0.3s ease",
+    zIndex: 3,
+    opacity: 0,
+    padding: 0,
+  },
+  navArrowShow: {
+    opacity: 1,
+  },
+  navArrowHover: {
+    background: "rgba(102, 126, 234, 0.6)",
+    transform: "translateY(-50%) scale(1.1)",
+  },
+  navArrowLeft: {
+    left: "12px",
+  },
+  navArrowRight: {
+    right: "12px",
+  },
+  // Badge overlays
+  badgeContainer: {
+    position: "absolute",
+    top: "12px",
+    right: "12px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+    zIndex: 2,
+  },
+  badge: {
+    padding: "4px 12px",
+    borderRadius: "20px",
+    fontSize: "11px",
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
+    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.2)",
+  },
+  badgeNew: {
+    background: "rgba(74, 222, 128, 0.15)",
+    color: "#4ade80",
+    border: "1px solid rgba(74, 222, 128, 0.15)",
+  },
+  badgeSale: {
+    background: "rgba(251, 146, 60, 0.15)",
+    color: "#fb923c",
+    border: "1px solid rgba(251, 146, 60, 0.15)",
+  },
+  badgeFeatured: {
+    background: "rgba(102, 126, 234, 0.15)",
+    color: "#a8b5ff",
+    border: "1px solid rgba(102, 126, 234, 0.15)",
+  },
+  wishlistButton: {
+    position: "absolute",
+    bottom: "56px",
+    right: "12px",
+    width: "36px",
+    height: "36px",
+    borderRadius: "50%",
+    background: "rgba(0,0,0,0.4)",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
+    border: "1px solid rgba(255,255,255,0.1)",
+    color: "#fff",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "18px",
+    transition: "all 0.3s ease",
+    zIndex: 2,
+  },
+  wishlistButtonHover: {
+    background: "rgba(239, 68, 68, 0.4)",
+    borderColor: "rgba(239, 68, 68, 0.3)",
+    transform: "scale(1.1)",
+  },
+  wishlistButtonActive: {
+    background: "rgba(239, 68, 68, 0.3)",
+    color: "#ef4444",
+  },
+  content: {
+    padding: "20px 20px 24px",
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+    background: "rgba(255, 255, 255, 0.02)",
+  },
+  categoryTag: {
+    fontSize: "11px",
+    fontWeight: "600",
+    color: "rgba(3, 121, 86, 0.82)",
+    textTransform: "uppercase",
+    letterSpacing: "1px",
+  },
+  name: {
+    fontSize: "16px",
+    fontWeight: "700",
+    color: "#001f27",
+    margin: 0,
+    lineHeight: "1.4",
+    display: "-webkit-box",
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: "vertical",
+    overflow: "hidden",
+    minHeight: "44px",
+    textShadow: "0 1px 2px rgba(0, 0, 0, 0.2)",
+  },
+  ratingContainer: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    marginTop: "4px",
+  },
+  stars: {
+    display: "flex",
+    gap: "2px",
+    color: "#fbbf24",
+  },
+  ratingText: {
+    fontSize: "13px",
+    color: "rgb(46, 131, 0)",
+  },
+  priceContainer: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    marginTop: "4px",
+  },
+  price: {
+    fontSize: "24px",
+    fontWeight: "800",
+    color: "#fff",
+    background: "linear-gradient(135deg, #667eea, #764ba2)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    backgroundClip: "text",
+    textShadow: "none",
+  },
+  originalPrice: {
+    fontSize: "16px",
+    color: "rgba(255, 255, 255, 0.2)",
+    textDecoration: "line-through",
+  },
+  discount: {
+    fontSize: "13px",
+    fontWeight: "700",
+    color: "#4ade80",
+    background: "rgba(74, 222, 128, 0.1)",
+    padding: "2px 10px",
+    borderRadius: "12px",
+    backdropFilter: "blur(5px)",
+    WebkitBackdropFilter: "blur(5px)",
+    border: "1px solid rgba(74, 222, 128, 0.1)",
+  },
+  stockContainer: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    marginTop: "4px",
+  },
+  stockBar: {
+    flex: 1,
+    height: "4px",
+    borderRadius: "2px",
+    background: "rgba(255, 255, 255, 0.05)",
+    overflow: "hidden",
+  },
+  stockBarFill: {
+    height: "100%",
+    borderRadius: "2px",
+    transition: "width 0.5s ease",
+  },
+  stockBarLow: {
+    background: "linear-gradient(90deg, #ef4444, #f59e0b)",
+  },
+  stockBarMedium: {
+    background: "linear-gradient(90deg, #f59e0b, #4ade80)",
+  },
+  stockBarHigh: {
+    background: "linear-gradient(90deg, #4ade80, #34d399)",
+  },
+  stockText: {
+    fontSize: "12px",
+    color: "rgba(255, 255, 255, 0.3)",
+    whiteSpace: "nowrap",
+  },
+  stockTextLow: {
+    color: "#ef4444",
+  },
+  stockTextMedium: {
+    color: "#f59e0b",
+  },
+  stockTextHigh: {
+    color: "#4ade80",
+  },
+  footer: {
+    marginTop: "auto",
+    display: "flex",
+    gap: "8px",
+    paddingTop: "12px",
+    borderTop: "1px solid rgba(255, 255, 255, 0.04)",
+  },
+  addToCartButton: {
+    flex: 1,
+    padding: "12px 20px",
+    background: "rgba(4, 34, 169, 0.66)",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
+    border: "1px solid rgba(102, 126, 234, 0.15)",
+    borderRadius: "12px",
+    color: "#fff7f7",
+    fontSize: "14px",
+    fontWeight: "600",
+    cursor: "pointer",
+    transition: "all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "8px",
+    position: "relative",
+    overflow: "hidden",
+  },
+  addToCartButtonHover: {
+    background: "rgba(26, 167, 255, 0.84)",
+    borderColor: "rgba(0, 0, 0, 0.59)",
+    transform: "scale(1.02)",
+    boxShadow: "0 8px 30px rgba(102, 126, 234, 0.15)",
+  },
+  addToCartButtonActive: {
+    transform: "scale(0.95)",
+  },
+  addToCartButtonAdded: {
+    background: "rgba(6, 211, 81, 0.92)",
+    borderColor: "rgba(74, 222, 128, 0.2)",
+    boxShadow: "0 8px 30px rgba(74, 222, 128, 0.15)",
+  },
+  buttonShimmer: {
+    position: "absolute",
+    top: 0,
+    left: "-100%",
+    width: "100%",
+    height: "100%",
+    background:
+      "linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)",
+    animation: "shimmer 2s infinite",
+  },
+  buttonIcon: {
+    fontSize: "18px",
+  },
+  buyNowButton: {
+    padding: "12px 20px",
+    background: "rgb(255, 217, 1)",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
+    border: "1px solid rgba(255, 255, 255, 0.06)",
+    borderRadius: "12px",
+    color: "rgb(0, 0, 0)",
+    fontSize: "14px",
+    fontWeight: "500",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    whiteSpace: "nowrap",
+  },
+  buyNowButtonHover: {
+    background: "rgb(255, 185, 0)",
+    borderColor: "rgba(0, 0, 0, 0.12)",
+    transform: "scale(1.03)",
+    boxShadow: "0 10px 22px rgba(255, 217, 1, 0.4)",
+    color: "#111827",
+  },
+  outOfStock: {
+    padding: "12px",
+    background: "rgba(239, 68, 68, 0.08)",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
+    borderRadius: "12px",
+    color: "#ef4444",
+    fontSize: "14px",
+    fontWeight: "600",
+    textAlign: "center",
+    border: "1px solid rgba(239, 68, 68, 0.08)",
+  },
+  glassReflection: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: "50%",
+    background:
+      "linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, transparent 100%)",
+    pointerEvents: "none",
+    borderRadius: "20px 20px 0 0",
+  },
+  glassBorder: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: "20px",
+    border: "1px solid rgba(255, 255, 255, 0.03)",
+    pointerEvents: "none",
+  },
+};
 
+// Keyframes
+const keyframes = `
+  @keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+  
+  @keyframes slideUp {
+    from { 
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to { 
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+`;
 
-export default function ProductCard({ product, onAddToCart }) {
+// Add keyframes to document
+if (typeof document !== "undefined") {
+  const styleSheet = document.createElement("style");
+  styleSheet.textContent = keyframes;
+  document.head.appendChild(styleSheet);
+}
+
+export default function ProductCard({ product }) {
+  const { addToCart } = useCart();
   const [isHovered, setIsHovered] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const [showNotification, setShowNotification] = useState(false);
+  const [isAdded, setIsAdded] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isWishlistHovered, setIsWishlistHovered] = useState(false);
+  const [isAddToCartHovered, setIsAddToCartHovered] = useState(false);
+  const [isAddToCartPressed, setIsAddToCartPressed] = useState(false);
+  const [isCheckoutActive, setIsCheckoutActive] = useState(false);
+  const [isBuyNowHovered, setIsBuyNowHovered] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+  const [isSliding, setIsSliding] = useState(false);
+  const [hoveredDot, setHoveredDot] = useState(null);
+  const [showArrows, setShowArrows] = useState(false);
+  const slideInterval = useRef(null);
+  const videoRefs = useRef({});
 
-  // Calculate discount
-  const discountPercentage = product.originalPrice 
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-    : 0;
+  // Collect all media (images and videos)
+  const mediaItems = [];
 
-  // Format price for Amazon-style display
-  const formatPrice = (price) => {
-    const formatted = price.toLocaleString('en-IN');
-    const [whole, fraction] = formatted.split('.');
-    return { whole, fraction: fraction || '00' };
+  // Add images
+  if (product.images && product.images.length > 0) {
+    product.images.forEach((img, index) => {
+      mediaItems.push({
+        type: "image",
+        src: `${backendURL}${img}`,
+        id: `img-${index}`,
+      });
+    });
+  }
+
+  // Add videos
+  if (product.videos && product.videos.length > 0) {
+    product.videos.forEach((video, index) => {
+      mediaItems.push({
+        type: "video",
+        src: `${backendURL}${video}`,
+        id: `video-${index}`,
+      });
+    });
+  }
+
+  // If no media, use placeholder
+  if (mediaItems.length === 0) {
+    mediaItems.push({
+      type: "placeholder",
+      src: null,
+      id: "placeholder",
+    });
+  }
+
+  const hasMultipleMedia = mediaItems.length > 1;
+
+  // Auto-slide when hovered
+  useEffect(() => {
+    if (isHovered && hasMultipleMedia) {
+      slideInterval.current = setInterval(() => {
+        setCurrentMediaIndex((prev) => (prev + 1) % mediaItems.length);
+      }, 3000);
+    } else {
+      clearInterval(slideInterval.current);
+      if (!isHovered) {
+        setCurrentMediaIndex(0);
+      }
+    }
+
+    return () => clearInterval(slideInterval.current);
+  }, [isHovered, hasMultipleMedia, mediaItems.length]);
+
+  // Handle video playback
+  useEffect(() => {
+    // Pause all videos when not hovered
+    Object.values(videoRefs.current).forEach((videoRef) => {
+      if (videoRef) {
+        if (!isHovered) {
+          videoRef.pause();
+          videoRef.currentTime = 0;
+        }
+      }
+    });
+
+    // Play current video if hovered and it's a video
+    if (isHovered) {
+      const currentMedia = mediaItems[currentMediaIndex];
+      if (currentMedia?.type === "video") {
+        const videoRef = videoRefs.current[currentMedia.id];
+        if (videoRef) {
+          videoRef.play().catch(() => {});
+        }
+      }
+    }
+  }, [isHovered, currentMediaIndex, mediaItems]);
+
+  const goToMedia = (index) => {
+    if (isSliding) return;
+    setIsSliding(true);
+    setCurrentMediaIndex(index);
+    setTimeout(() => setIsSliding(false), 800);
   };
 
-  const currentPrice = formatPrice(product.price);
-  const originalPrice = product.originalPrice ? formatPrice(product.originalPrice) : null;
-
-  // Calculate saved amount
-  const savedAmount = product.originalPrice 
-    ? (product.originalPrice - product.price).toLocaleString('en-IN')
-    : 0;
-
-  // Generate star rating display
-  const renderStars = (rating = 4.2) => {
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-    
-    return (
-      <div className="amazon-stars">
-        {[...Array(fullStars)].map((_, i) => (
-          <span key={`full-${i}`} className="amazon-star-filled">★</span>
-        ))}
-        {hasHalfStar && <span className="amazon-star-half">½</span>}
-        {[...Array(emptyStars)].map((_, i) => (
-          <span key={`empty-${i}`} className="amazon-star-empty">☆</span>
-        ))}
-      </div>
-    );
-  };
-
-  const handleAddToCart = async (e) => {
+  const goToPrevious = (e) => {
     e.stopPropagation();
-    if (product.stock === 0) return;
-    
-    setIsAddingToCart(true);
-    
-    setTimeout(() => {
-      setIsAddingToCart(false);
-      setShowNotification(true);
-      if (onAddToCart) onAddToCart(product);
-      setTimeout(() => setShowNotification(false), 3000);
-    }, 400);
+    const newIndex = currentMediaIndex === 0 ? mediaItems.length - 1 : currentMediaIndex - 1;
+    goToMedia(newIndex);
   };
 
-  const handleWishlist = (e) => {
+  const goToNext = (e) => {
     e.stopPropagation();
+    const newIndex = (currentMediaIndex + 1) % mediaItems.length;
+    goToMedia(newIndex);
+  };
+
+  const stockPercentage = product.stock
+    ? Math.min((product.stock / 100) * 100, 100)
+    : 0;
+  const isLowStock = product.stock && product.stock < 10;
+  const isOutOfStock = product.stock === 0 || !product.stock;
+
+  // Mock rating
+  const rating = product.rating || 4.5;
+  const totalReviews = product.reviews || 128;
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 >= 0.5;
+
+  const handleAddToCart = () => {
+    if (isOutOfStock) return;
+    addToCart(product);
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
+  };
+
+  const handleWishlist = () => {
     setIsWishlisted(!isWishlisted);
   };
 
-  return (
-    <>
-      <div 
-        className="amazon-product-card"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        {/* Image Container */}
-        <div className="amazon-image-container">
-          <div className="amazon-image-inner">
-            {!imageLoaded && <div className="amazon-skeleton"></div>}
-           <img
-  src={
-    product.images?.[0]
-      ? `${backendURL}${product.images[0]}`
-      : "https://via.placeholder.com/300x300?text=No+Image"
+  const getStockStatus = () => {
+    if (isOutOfStock)
+      return { text: "Out of Stock", color: "#ef4444", class: styles.stockTextLow };
+    if (isLowStock)
+      return { text: "Low Stock", color: "#ef4444", class: styles.stockTextLow };
+    if (stockPercentage > 70)
+      return { text: "In Stock", color: "#4ade80", class: styles.stockTextHigh };
+    return { text: "Limited Stock", color: "#f59e0b", class: styles.stockTextMedium };
+  };
+
+  const stockStatus = getStockStatus();
+
+  const getStockBarColor = () => {
+    if (isOutOfStock) return styles.stockBarLow;
+    if (isLowStock) return styles.stockBarLow;
+    if (stockPercentage > 70) return styles.stockBarHigh;
+    return styles.stockBarMedium;
+  };
+
+  // Check if current media is video
+  const currentMedia = mediaItems[currentMediaIndex] || mediaItems[0];
+  const isVideo = currentMedia?.type === "video";
+
+
+
+
+
+
+const navigate = useNavigate();
+
+const handleBuyNow_card = (product) => {
+
+    setIsCheckoutActive(true);
+    setTimeout(() => setIsCheckoutActive(false), 200);
+  if (!isLoggedIn()) {
+    localStorage.setItem("redirectAfterLogin", "/checkout");
+    navigate("/login");
+    return;
   }
-  alt={product.name}
-  className="amazon-product-img"
-  style={{ opacity: imageLoaded ? 1 : 0 }}
-  onLoad={() => setImageLoaded(true)}
-  onError={(e) => {
-    e.target.src = "https://via.placeholder.com/300x300?text=No+Image";
-  }}
-/>
-          </div>
 
-          {/* Discount Badge */}
-          {discountPercentage > 0 && (
-            <div className="amazon-badge amazon-badge-deal">
-              -{discountPercentage}%
+  localStorage.setItem("checkoutType", "buyNow");
+  localStorage.setItem("buyNowProduct", JSON.stringify(product));
+
+  navigate("/checkout");
+};
+
+
+
+
+
+
+  return (
+    <div
+      style={{
+        ...styles.card,
+        ...(isHovered ? styles.cardHover : {}),
+        animation: "slideUp 0.5s ease-out",
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Glass Reflection Effect */}
+      <div style={styles.glassReflection} />
+      <div style={styles.glassBorder} />
+
+      {/* Image/Video Container */}
+      <div style={styles.imageContainer}>
+        <div
+          style={styles.mediaWrapper}
+          onMouseEnter={() => setShowArrows(true)}
+          onMouseLeave={() => setShowArrows(false)}
+        >
+          {/* Media Items */}
+          {mediaItems.map((media, index) => {
+            const isActive = index === currentMediaIndex;
+            const isExit = index === (currentMediaIndex - 1 + mediaItems.length) % mediaItems.length;
+
+            if (media.type === "image") {
+              return (
+                <div
+                  key={media.id}
+                  style={{
+                    ...styles.mediaSlide,
+                    ...(isActive ? styles.mediaSlideActive : {}),
+                    ...(isExit && !isActive ? styles.mediaSlideExit : {}),
+                  }}
+                >
+                  {!imageError ? (
+                    <img
+                      src={media.src}
+                      alt={product.name}
+                      style={{
+                        ...styles.image,
+                        ...(isHovered ? styles.imageHover : {}),
+                      }}
+                      onError={() => setImageError(true)}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div style={styles.imagePlaceholder}>🛡️</div>
+                  )}
+                </div>
+              );
+            } else if (media.type === "video") {
+              return (
+                <div
+                  key={media.id}
+                  style={{
+                    ...styles.mediaSlide,
+                    ...(isActive ? styles.mediaSlideActive : {}),
+                    ...(isExit && !isActive ? styles.mediaSlideExit : {}),
+                  }}
+                >
+                  <video
+                    ref={(el) => {
+                      if (el) videoRefs.current[media.id] = el;
+                    }}
+                    src={media.src}
+                    style={styles.video}
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                  />
+                </div>
+              );
+            } else {
+              return (
+                <div
+                  key={media.id}
+                  style={{
+                    ...styles.mediaSlide,
+                    ...(isActive ? styles.mediaSlideActive : {}),
+                  }}
+                >
+                  <div style={styles.imagePlaceholder}>🛡️</div>
+                </div>
+              );
+            }
+          })}
+
+          {/* Media Type Badge */}
+          {isVideo && (
+            <div style={styles.mediaTypeBadge}>
+              ▶️ Video
             </div>
           )}
 
-          {/* Great Indian Festival badge */}
-          {discountPercentage > 30 && (
-            <div className="amazon-badge amazon-badge-great" style={{ top: '50px' }}>
-              Great Deal
-            </div>
-          )}
-
-          {/* Stock Badge */}
-          {product.stock === 0 && (
-            <div className="amazon-stock-badge">
-              Out of Stock
-            </div>
-          )}
-
-          {/* Wishlist Button */}
-          <button 
-            className="amazon-wishlist-btn"
-            onClick={handleWishlist}
-            style={{ 
-              background: isWishlisted ? '#ffd814' : 'white',
-              borderColor: isWishlisted ? '#fcd200' : '#d5d9d9'
-            }}
-          >
-            {isWishlisted ? '❤️' : '🤍'}
-          </button>
-
-          {/* Quick View Button */}
-          {isHovered && product.stock > 0 && (
-            <button 
-              className="amazon-quickview-btn"
-              onClick={(e) => {
-                e.stopPropagation();
-                console.log("Quick view:", product);
-              }}
-            >
-              Quick look
-            </button>
+          {/* Navigation Arrows */}
+          {hasMultipleMedia && isHovered && (
+            <>
+              <button
+                style={{
+                  ...styles.navArrow,
+                  ...styles.navArrowLeft,
+                  ...(showArrows ? styles.navArrowShow : {}),
+                }}
+                onMouseEnter={(e) =>
+                  Object.assign(e.currentTarget.style, styles.navArrowHover)
+                }
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(-50%) scale(1)";
+                  e.currentTarget.style.background = "rgba(0,0,0,0.4)";
+                }}
+                onClick={goToPrevious}
+              >
+                ‹
+              </button>
+              <button
+                style={{
+                  ...styles.navArrow,
+                  ...styles.navArrowRight,
+                  ...(showArrows ? styles.navArrowShow : {}),
+                }}
+                onMouseEnter={(e) =>
+                  Object.assign(e.currentTarget.style, styles.navArrowHover)
+                }
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(-50%) scale(1)";
+                  e.currentTarget.style.background = "rgba(0,0,0,0.4)";
+                }}
+                onClick={goToNext}
+              >
+                ›
+              </button>
+            </>
           )}
         </div>
 
-        {/* Product Info */}
-        <div className="amazon-info">
-          {/* Product Title */}
-          <div className="amazon-product-title">
-            {product.name}
+        {/* Media Dots */}
+        {hasMultipleMedia && (
+          <div style={styles.mediaDots}>
+            {mediaItems.map((_, index) => (
+              <button
+                key={index}
+                style={{
+                  ...styles.dot,
+                  ...(index === currentMediaIndex ? styles.dotActive : {}),
+                  ...(hoveredDot === index ? styles.dotHover : {}),
+                }}
+                onMouseEnter={() => setHoveredDot(index)}
+                onMouseLeave={() => setHoveredDot(null)}
+                onClick={() => goToMedia(index)}
+              />
+            ))}
           </div>
+        )}
 
-          {/* Rating Section */}
-          <div className="amazon-rating">
-            {renderStars(product.rating || 4.2)}
-            <span className="amazon-rating-count">
-              {product.reviewCount || Math.floor(Math.random() * 500) + 50}
+        {/* Badges - Right side */}
+        <div style={styles.badgeContainer}>
+          {product.isNew && (
+            <span style={{ ...styles.badge, ...styles.badgeNew }}>✨ New</span>
+          )}
+          {product.isSale && (
+            <span style={{ ...styles.badge, ...styles.badgeSale }}>🔥 Sale</span>
+          )}
+          {product.isFeatured && (
+            <span style={{ ...styles.badge, ...styles.badgeFeatured }}>
+              ⭐ Featured
             </span>
-          </div>
-
-          {/* Price Section */}
-          <div className="amazon-price-section">
-            <span className="amazon-price-currency">₹</span>
-            <span className="amazon-price-whole">{currentPrice.whole}</span>
-            <span className="amazon-price-fraction">.{currentPrice.fraction}</span>
-            
-            {originalPrice && (
-              <>
-                <span className="amazon-price-original">
-                  ₹{originalPrice.whole}.{originalPrice.fraction}
-                </span>
-                <span className="amazon-price-saved">
-                  (Save ₹{savedAmount})
-                </span>
-              </>
-            )}
-          </div>
-
-          {/* Deal Row */}
-          {discountPercentage > 0 && (
-            <div className="amazon-deal-row">
-              <span className="amazon-deal-badge">Deal of the Day</span>
-              <span className="amazon-deal-text">
-                {discountPercentage}% off
-              </span>
-            </div>
           )}
-
-          {/* Prime Badge */}
-          <div className="amazon-prime-badge">
-            <span className="amazon-prime-icon">Prime</span>
-            <span className="amazon-prime-text">FREE Delivery</span>
-          </div>
-
-          {/* Delivery Info */}
-          <div className="amazon-delivery">
-            Delivery <strong>Tomorrow</strong>
-            {product.price > 999 && (
-              <span className="amazon-delivery-free"> | FREE Delivery</span>
-            )}
-          </div>
-
-          {/* Stock Status */}
-          {product.stock > 0 && product.stock < 10 && (
-            <div className="amazon-stock-info amazon-stock-low">
-              Only {product.stock} left in stock.
-            </div>
+          {isOutOfStock && (
+            <span style={{ ...styles.badge, ...styles.badgeSale }}>Sold Out</span>
           )}
-          {product.stock >= 10 && (
-            <div className="amazon-stock-info">
-              In stock
-            </div>
-          )}
-
-          {/* Add to Cart Button */}
-          <button 
-            className={`amazon-add-btn 
-              ${product.stock === 0 ? 'amazon-add-btn-disabled' : ''} 
-              ${isAddingToCart ? 'amazon-add-btn-adding' : ''}`}
-            onClick={handleAddToCart}
-            disabled={product.stock === 0 || isAddingToCart}
-          >
-            {isAddingToCart ? (
-              <div className="amazon-spinner"></div>
-            ) : (
-              <>
-                {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
-                {product.stock > 0 && ' 🛒'}
-              </>
-            )}
-          </button>
         </div>
+
+        {/* Wishlist Button */}
+        <button
+          style={{
+            ...styles.wishlistButton,
+            ...(isWishlistHovered ? styles.wishlistButtonHover : {}),
+            ...(isWishlisted ? styles.wishlistButtonActive : {}),
+          }}
+          onMouseEnter={() => setIsWishlistHovered(true)}
+          onMouseLeave={() => setIsWishlistHovered(false)}
+          onClick={handleWishlist}
+        >
+          {isWishlisted ? "❤️" : "🤍"}
+        </button>
       </div>
 
-      {/* Toast Notification */}
-      {showNotification && (
-        <div className="amazon-toast">
-          <div className="amazon-toast-icon">✓</div>
-          <span>Added to Cart</span>
+      {/* Content */}
+      <div style={styles.content}>
+        {product.category && (
+          <span style={styles.categoryTag}>{product.category}</span>
+        )}
+
+        <h3 style={styles.name}>{product.name}</h3>
+
+        {/* Rating */}
+        <div style={styles.ratingContainer}>
+          <div style={styles.stars}>
+            {[...Array(5)].map((_, i) => (
+              <span key={i}>
+                {i < fullStars ? "⭐" : i === fullStars && hasHalfStar ? "⭐" : "☆"}
+              </span>
+            ))}
+          </div>
+          <span style={styles.ratingText}>({totalReviews} reviews)</span>
         </div>
-      )}
-    </>
+
+        {/* Price */}
+        <div style={styles.priceContainer}>
+          <span style={styles.price}>₹{product.price}</span>
+          {product.originalPrice && (
+            <>
+              <span style={styles.originalPrice}>₹{product.originalPrice}</span>
+              <span style={styles.discount}>
+                -
+                {Math.round(
+                  ((product.originalPrice - product.price) / product.originalPrice) *
+                    100
+                )}
+                %
+              </span>
+            </>
+          )}
+        </div>
+
+        {/* Stock */}
+        <div style={styles.stockContainer}>
+          <div style={styles.stockBar}>
+            <div
+              style={{
+                ...styles.stockBarFill,
+                ...getStockBarColor(),
+                width: isOutOfStock ? "0%" : `${stockPercentage}%`,
+              }}
+            />
+          </div>
+          <span style={{ ...styles.stockText, ...stockStatus.class }}>
+            {stockStatus.text}
+          </span>
+        </div>
+
+        {/* Footer */}
+        <div style={styles.footer}>
+          {!isOutOfStock ? (
+            <>
+              <button
+                style={{
+                  ...styles.addToCartButton,
+                  ...(isAdded ? styles.addToCartButtonAdded : {}),
+                  ...(isAddToCartHovered && !isAdded
+                    ? styles.addToCartButtonHover
+                    : {}),
+                  ...(isAddToCartPressed ? styles.addToCartButtonActive : {}),
+                }}
+                onMouseEnter={() => setIsAddToCartHovered(true)}
+                onMouseLeave={() => {
+                  setIsAddToCartHovered(false);
+                  setIsAddToCartPressed(false);
+                }}
+                onMouseDown={() => setIsAddToCartPressed(true)}
+                onMouseUp={() => setIsAddToCartPressed(false)}
+                onClick={handleAddToCart}
+              >
+                <div style={styles.buttonShimmer} />
+                <span style={styles.buttonIcon}>{isAdded ? "✅" : "🛒"}</span>
+                {isAdded ? "Added!" : "Add to Cart"}
+              </button>
+             <button
+  style={{
+    ...styles.buyNowButton,
+    ...(isBuyNowHovered ? styles.buyNowButtonHover : {}),
+  }}
+  onMouseEnter={() => setIsBuyNowHovered(true)}
+  onMouseLeave={() => setIsBuyNowHovered(false)}
+ onClick={() => handleBuyNow_card(product)}
+>
+  Buy Now
+</button>
+            </>
+          ) : (
+            <div style={styles.outOfStock}>⛔ Out of Stock</div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

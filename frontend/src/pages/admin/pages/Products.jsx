@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
 
-import ProductForm from "../components/ProductForm";
-import ProductTable from "../components/ProductTable";
-import ProductCardView from "../components/ProductCardView";
-import ProductDetailsModal from "../components/ProductDetailsModal";
+import ProductForm from "../components/product/ProductForm";
+import ProductTable from "../components/product/ProductTable";
+import ProductCardView from "../components/product/ProductCardView";
+import ProductDetailsModal from "../components/product/ProductDetailsModal";
 
 
 
 import {
   getProducts,
   deleteProduct,
-} from "../services/productService";
+} from "../../../services/productService";
 
 export default function Products() {
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { backendURL } from "../services/api";
+import { backendURL } from "../../../../services/api";
 import "./ProductCardView.css";
 
 export default function ProductCardView({ products }) {
@@ -25,8 +25,8 @@ export default function ProductCardView({ products }) {
     <div className="products-app">
       {/* Header Section */}
       <div className="products-header">
-        <h1 className="products-title">Our Collection</h1>
-        <p className="products-subtitle">Discover amazing products handpicked for you</p>
+        <h6 className="products-title">Our Collection</h6>
+        <p className="products-subtitle">List of Products</p>
       </div>
 
       {/* Filters Bar */}
@@ -271,13 +271,13 @@ function ProductCard({ product }) {
           </div>
         </div>
 
-        <button 
+        {/* <button 
           className={`add-to-cart-btn ${product.stock === 0 ? 'disabled' : ''}`}
           onClick={handleAddToCart}
           disabled={product.stock === 0}
         >
           {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
-        </button>
+        </button> */}
       </div>
     </div>
   );

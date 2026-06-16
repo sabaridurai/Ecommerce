@@ -380,8 +380,8 @@ const NAV = [
   {
     section: "Finance",
     items: [
-      { to: "/admin/payments",  icon: "💳", label: "Payments",  badge: "3", badgeType: "red" },
-    //   { to: "/admin/orders",    icon: "🧾", label: "Orders",    badge: "12", badgeType: "green" },
+      {  to: "/admin/payments",  icon: "💳",  label: "Payment Methods",  badge: "3",  badgeType: "green"},
+      { to: "/admin/paymentHistory",    icon: "🧾", label: "Payment History",    badge: "12", badgeType: "green" },
     //   { to: "/admin/refunds",   icon: "↩️",  label: "Refunds",   badge: null },
     ],
   },

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { backendURL } from "../services/api";
+import { backendURL } from "../../../../services/api";
 
 export default function ProductDetailsModal({ product, onClose }) {
   if (!product) return null;

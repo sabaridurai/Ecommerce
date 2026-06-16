@@ -9,7 +9,7 @@ const api = axios.create({
 // Attach token dynamically
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("access");
-  console.log("Attaching token:", token);
+  // console.log("Attaching token:", token);
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;

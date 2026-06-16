@@ -1,34 +1,41 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { saveProduct } from "../services/productService";
+import { saveProduct } from "../../../../services/productService";
+import { backendURL } from "../../../../services/api";
 
 
 export default function ProductForm({ onSave, editProduct, onCancel }) {
-  const [form, setForm] = useState({
-    name: "",
-    description: "",
-    price: "",
-    category: "",
-    stock: "in",
-  });
+const [form, setForm] = useState({
+  name: "",
+  brand: "",
+  category: "",
+  sub_category: "",
+  model_number: "",
+  description: "",
+  price: "",
+  stock: "",
+});
 
   const [images, setImages] = useState([]);
   const [videos, setVideos] = useState([]);
 
-  useEffect(() => {
-    if (editProduct) {
-      setForm({
-        name: editProduct.name || "",
-        description: editProduct.description || "",
-        price: editProduct.price || "",
-        category: editProduct.category || "",
-        stock: editProduct.stock > 0 ? "in" : "out",
-      });
+useEffect(() => {
+  if (editProduct) {
+    setForm({
+      name: editProduct.name || "",
+      brand: editProduct.brand || "",
+      category: editProduct.category || "",
+      sub_category: editProduct.sub_category || "",
+      model_number: editProduct.model_number || "",
+      description: editProduct.description || "",
+      price: editProduct.price || "",
+      stock: editProduct.stock || "",
+    });
 
-      setImages(editProduct.images || []);
-      setVideos(editProduct.videos || []);
-    }
-  }, [editProduct]);
+    setImages(editProduct.images || []);
+    setVideos(editProduct.videos || []);
+  }
+}, [editProduct]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -37,12 +44,16 @@ export default function ProductForm({ onSave, editProduct, onCancel }) {
 const submit = async () => {
   const formData = new FormData();
 
-  formData.append("name", form.name);
-  formData.append("description", form.description);
-  formData.append("price", form.price);
-  formData.append("category", form.category);
-  formData.append("stock", form.stock === "in" ? 10 : 0);
+formData.append("name", form.name);
+formData.append("brand", form.brand);
+formData.append("category", form.category);
+formData.append("sub_category", form.sub_category);
+formData.append("model_number", form.model_number);
+formData.append("description", form.description);
+formData.append("price", form.price);
+formData.append("stock", form.stock);
 
+console.log("Submitting form with data:", form); 
   images.forEach((file) => {
     if (file instanceof File) {
       formData.append("images", file);
@@ -84,51 +95,85 @@ const submit = async () => {
         </div>
 
         {/* FORM GRID */}
-        <div style={styles.grid}>
-          <input
-            name="name"
-            placeholder="Product Name"
-            value={form.name}
-            onChange={handleChange}
-            style={styles.input}
-          />
+     <div style={styles.grid}>
+  <input
+    name="name"
+    placeholder="Product Name"
+    value={form.name}
+    onChange={handleChange}
+    style={styles.input}
+  />
 
-          <input
-            name="category"
-            placeholder="Category"
-            value={form.category}
-            onChange={handleChange}
-            style={styles.input}
-          />
+  <input
+    name="brand"
+    placeholder="Brand (Hikvision, Dahua, CP Plus...)"
+    value={form.brand}
+    onChange={handleChange}
+    style={styles.input}
+  />
 
-          <input
-            name="price"
-            placeholder="Price"
-            value={form.price}
-            onChange={handleChange}
-            style={styles.input}
-          />
+  <select
+    name="category"
+    value={form.category}
+    onChange={handleChange}
+    style={styles.input}
+  >
+    <option value="">Select Category</option>
+    <option value="camera">Camera</option>
+    <option value="dvr">DVR</option>
+    <option value="nvr">NVR</option>
+    <option value="kit">Security Kit</option>
+    <option value="accessories">Accessories</option>
+  </select>
 
-          <select
-            name="stock"
-            value={form.stock}
-            onChange={handleChange}
-            style={styles.input}
-          >
-            <option value="in">🟢 In Stock</option>
-            <option value="out">🔴 Out of Stock</option>
-          </select>
-        </div>
+  <input
+    name="sub_category"
+    placeholder="Sub Category"
+    value={form.sub_category}
+    onChange={handleChange}
+    style={styles.input}
+  />
+
+  <input
+    name="model_number"
+    placeholder="Model Number"
+    value={form.model_number}
+    onChange={handleChange}
+    style={styles.input}
+  />
+
+  <input
+    type="number"
+    name="price"
+    placeholder="Price"
+    value={form.price}
+    onChange={handleChange}
+    style={styles.input}
+  />
+
+  <input
+    type="number"
+    name="stock"
+    placeholder="Stock Quantity"
+    value={form.stock}
+    onChange={handleChange}
+    style={styles.input}
+    min="0"
+  />
+</div>
 
         {/* DESCRIPTION */}
         <textarea
-          name="description"
-          placeholder="Product Description"
-          value={form.description}
-          onChange={handleChange}
-          style={{ ...styles.input, marginTop: 12 }}
-          rows={3}
-        />
+  name="description"
+  placeholder="Full Product Description"
+  value={form.description}
+  onChange={handleChange}
+  style={{
+    ...styles.input,
+    marginTop: 12,
+    minHeight: "120px",
+  }}
+/>
 
         {/* UPLOAD */}
         <div style={styles.uploadGrid}>
@@ -155,26 +200,35 @@ const submit = async () => {
 
         </div>
 
+        
         {/* PREVIEW */}
-        <div style={styles.preview}>
-          {images.map((img, i) => (
-            <img
-              key={i}
-              src={img instanceof File ? URL.createObjectURL(img) : img}
-              style={styles.img}
-              alt=""
-            />
-          ))}
+<div style={styles.preview}>
+  {images.map((img, i) => (
+    <img
+      key={i}
+      src={
+        img instanceof File
+          ? URL.createObjectURL(img)
+          : `${backendURL}${img}`
+      }
+      style={styles.img}
+      alt={`preview-${i}`}
+    />
+  ))}
 
-          {videos.map((v, i) => (
-            <video
-              key={i}
-              src={v instanceof File ? URL.createObjectURL(v) : v}
-              controls
-              style={styles.video}
-            />
-          ))}
-        </div>
+  {videos.map((v, i) => (
+    <video
+      key={i}
+      src={
+        v instanceof File
+          ? URL.createObjectURL(v)
+          : `${backendURL}${v}`
+      }
+      controls
+      style={styles.video}
+    />
+  ))}
+</div>
 
         {/* ACTIONS */}
         <div style={styles.actions}>

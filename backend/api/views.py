@@ -1,8 +1,10 @@
+from itertools import product
+
 from django.shortcuts import render
 
 # Create your views here.
 from rest_framework import generics
-from .serializers import RegisterSerializer
+from .serializers import PaymentMethodSerializer, PaymentMethodSerializer, RegisterSerializer
 
 # loginapi
 
@@ -15,7 +17,7 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
 # For product api
-from .models import Product, ProductImage, ProductVideo
+from .models import PaymentMethod, PaymentMethod, Product, ProductImage, ProductVideo
 from .serializers import ProductSerializer
 
 
@@ -111,14 +113,17 @@ class ProductCreateView(APIView):
 
         data = request.data
 
-        product = Product.objects.create(
-            name=data.get("name"),
-            description=data.get("description"),
-            price=data.get("price"),
-            category=data.get("category"),
-            stock=data.get("stock"),
-        )
 
+        product = Product.objects.create(
+          name=data.get("name"),
+          brand=data.get("brand"),
+          category=data.get("category"),
+          sub_category=data.get("sub_category"),
+          model_number=data.get("model_number"),
+          description=data.get("description"),
+          price=data.get("price"),
+          stock=data.get("stock"),
+        )
         # IMAGES
         images = request.FILES.getlist("images")
         for img in images:
@@ -133,8 +138,8 @@ class ProductCreateView(APIView):
 
 
 class ProductListView(APIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    authentication_classes = []
+    permission_classes = [AllowAny]
     
 
     def get(self, request):
@@ -147,18 +152,26 @@ class ProductListView(APIView):
         data = []
 
         for p in products:
-            data.append({
-                "id": p.id,
-                "name": p.name,
-                "price": p.price,
-                "category": p.category,
-                "stock": p.stock,
+           data.append({
+               "id": p.id,
+               "name": p.name,
+               "brand": p.brand,
+               "category": p.category,
+               "sub_category": p.sub_category,
+               "model_number": p.model_number,
+               "price": p.price,
+               "stock": p.stock,
+               "description": p.description,
+               "images": [
+                  img.image.url
+                   for img in p.images.all()
+                ],
 
-                # 👇 IMPORTANT (images fix)
-                "images": [img.image.url for img in p.images.all()],
-                "videos": [v.video.url for v in p.videos.all()],
+               "videos": [
+                  v.video.url
+                  for v in p.videos.all()
+               ],
             })
-
         return Response(data)
     
 
@@ -171,10 +184,14 @@ class ProductDetailView(APIView):
         product = Product.objects.get(id=id)
 
         product.name = request.data.get("name")
+        product.brand = request.data.get("brand")
+        product.category = request.data.get("category")
+        product.sub_category = request.data.get("sub_category")
+        product.model_number = request.data.get("model_number")
         product.description = request.data.get("description")
         product.price = request.data.get("price")
-        product.category = request.data.get("category")
         product.stock = request.data.get("stock")
+
         product.save()
 
         return Response({"message": "updated"})
@@ -184,3 +201,23 @@ class ProductDetailView(APIView):
         product = Product.objects.get(id=id)
         product.delete()
         return Response({"message": "deleted"})   
+
+
+
+
+
+#  for admin payment detils
+
+
+class PaymentMethodListCreateView(
+    generics.ListCreateAPIView
+):
+    queryset = PaymentMethod.objects.all()
+    serializer_class = PaymentMethodSerializer
+
+
+class PaymentMethodDetailView(
+    generics.RetrieveUpdateDestroyAPIView
+):
+    queryset = PaymentMethod.objects.all()
+    serializer_class = PaymentMethodSerializer

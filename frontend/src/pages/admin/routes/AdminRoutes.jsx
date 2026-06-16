@@ -5,6 +5,7 @@ import Dashboard from "../pages/Dashboard";
 import Home from "../pages/Home";
 import Products from "../pages/Products";
 import Payments from "../pages/Payments";
+import PaymentHistory from "../pages/PaymentHistory";
 
 import ProtectedRoute from "../../../routes/ProtectedRoute";
 
@@ -26,6 +27,7 @@ export default function AdminRoutes() {
         <Route path="home" element={<Home />} />
         <Route path="products" element={<Products />} />
         <Route path="payments" element={<Payments />} />
+        <Route path="paymentHistory" element={<PaymentHistory />} />
       </Route>
     </Routes>
   );
