@@ -1,9 +1,9 @@
-import api from "./api";
+  import api from "./api";
 
-export const getMethods = async () => {
-  const res = await api.get("/payment-methods/");
-  return res.data;
-};
+  export const getMethods = async () => {
+    const res = await api.get("/payment-methods/");
+    return res.data;
+  };
 
 export const saveMethod = async (
   data,

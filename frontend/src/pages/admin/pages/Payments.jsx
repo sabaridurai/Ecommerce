@@ -172,23 +172,13 @@ const handleSubmit = async (e) => {
               <option value="BANK">BANK</option>
             </select>
 
-            {(form.payment_type === "UPI" ||
-              form.payment_type === "QR") && (
+
+
+
+ {(form.payment_type === "UPI" ||form.payment_type === "BANK" ||form.payment_type === "QR" ) && (
               <>
                 <input
-                  placeholder="UPI ID"
-                  value={form.upi_id}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      upi_id:
-                        e.target.value,
-                    })
-                  }
-                />
-
-                <input
-                  placeholder="Account Holder"
+                  placeholder={form.payment_type === "BANK"? "Account Holder": "User Name"}
                   value={form.account_holder}
                   onChange={(e) =>
                     setForm({
@@ -201,8 +191,25 @@ const handleSubmit = async (e) => {
               </>
             )}
 
-            {form.payment_type ===
-              "QR" && (
+               
+
+            {(form.payment_type === "UPI" ||form.payment_type === "QR") && (
+              <>
+                <input
+                  placeholder="UPI ID"
+                  value={form.upi_id}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      upi_id:
+                        e.target.value,
+                    })
+                  }
+                />
+              </>
+            )}
+
+            {form.payment_type === "QR" && (
               <>
                 <input
                   type="file"
@@ -225,9 +232,7 @@ const handleSubmit = async (e) => {
               </>
             )}
 
-            {form.payment_type ===
-              "BANK" && (
-              <>
+            {form.payment_type === "BANK"  && (<>
                 <input
                   placeholder="Bank Name"
                   value={form.bank_name}

@@ -8,6 +8,7 @@ import AdminRoutes from "./pages/admin/routes/AdminRoutes";
 
 import UserLanding from "./pages/user/dashboard/userlanding";
 import CheckoutPage from "./CheckoutPage";
+import Orders from "./Orders";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
 
             {/* /checkout */}
             <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/orders" element={<Orders />} />
 
 
           {/* ADMIN LOGIN */}

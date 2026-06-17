@@ -372,27 +372,28 @@ const NAV = [
   {
     section: "Catalog",
     items: [
-      { to: "/admin/products",  icon: "📦", label: "Products",  badge: "128", badgeType: "" },
-    //   { to: "/admin/inventory", icon: "🗄️", label: "Inventory",  badge: null },
-    //   { to: "/admin/categories",icon: "🏷️", label: "Categories", badge: null },
+      { to: "/admin/products",  icon: "📦", label: "Products",  badge: null, badgeType: "" },
+      { to: "/admin/ordersList", icon: "🗄️", label: "Orders",  badge: null },
+      { to: "/admin/paymentsList",icon: "🏷️", label: "Payments", badge: null },
+      { to: "/admin/usersList",icon: "👥", label: "Users", badge: null },
     ],
   },
   {
     section: "Finance",
     items: [
       {  to: "/admin/payments",  icon: "💳",  label: "Payment Methods",  badge: "3",  badgeType: "green"},
-      { to: "/admin/paymentHistory",    icon: "🧾", label: "Payment History",    badge: "12", badgeType: "green" },
+      // { to: "/admin/paymentHistory",    icon: "🧾", label: "Payment History",    badge: "12", badgeType: "green" },
     //   { to: "/admin/refunds",   icon: "↩️",  label: "Refunds",   badge: null },
     ],
   },
-  {
-    section: "System",
-    items: [
-    //   { to: "/admin/users",     icon: "👥", label: "Users",     badge: null },
-      { to: "/admin/settings",  icon: "⚙️", label: "Settings",  badge: null },
-    //   { to: "/admin/logs",      icon: "📋", label: "Audit Logs", badge: null },
-    ],
-  },
+  // {
+  //   section: "System",
+  //   items: [
+  //   //   { to: "/admin/users",     icon: "👥", label: "Users",     badge: null },
+  //     { to: "/admin/settings",  icon: "⚙️", label: "Settings",  badge: null },
+  //   //   { to: "/admin/logs",      icon: "📋", label: "Audit Logs", badge: null },
+  //   ],
+  // },
 ];
 
 export default function Sidebar() {

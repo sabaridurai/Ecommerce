@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import (AdminLoginView, PaymentMethodDetailView, PaymentMethodListCreateView, ProductCreateView, ProductDetailView, ProductListView,RegisterView, LoginView, MeView)
+from .views import (AdminLoginView,AdminOrderListView,AdminDashboardHomeView,AdminPaymentListView,AdminUserListView, OrderListView, PaymentMethodDetailView, PaymentMethodListCreateView, ProductCreateView, ProductDetailView, ProductListView,RegisterView, LoginView, MeView, SendOTPView, UploadPaymentProofView, VerifyOTPView)
 
 urlpatterns = [
 
@@ -12,8 +12,10 @@ urlpatterns = [
     path("products/", ProductListView.as_view()),
     path("products/create/", ProductCreateView.as_view()),
     path("products/<int:id>/", ProductDetailView.as_view()),
-
-
+    path("ordersList/", AdminOrderListView.as_view()),
+    path("paymentsList/", AdminPaymentListView.as_view()),
+    path("usersList/", AdminUserListView.as_view()),
+    path("dashboard/", AdminDashboardHomeView.as_view()),
 
 
 # for admin payment detils
@@ -26,5 +28,25 @@ urlpatterns = [
         "payment-methods/<int:pk>/",
         PaymentMethodDetailView.as_view()
     ),
+    path(
+    "payments/upload-proof/",
+    UploadPaymentProofView.as_view()
+),
+path("orders/", OrderListView.as_view(), name="order-list"),
+
+
+
+
+
+
+path(
+    "auth/send-otp/",
+    SendOTPView.as_view()
+),
+
+path(
+    "auth/verify-otp/",
+    VerifyOTPView.as_view()
+),
 
 ]

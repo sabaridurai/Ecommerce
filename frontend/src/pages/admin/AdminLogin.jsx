@@ -4,6 +4,7 @@ import axios from "axios";
 import { setAuth } from "../../utils/auth";
 import { getErrorMessage } from "../../utils/errorHandler";
 import { useNavigate } from "react-router-dom";
+import { backendURL } from "../../services/api";
 
 const css = `
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
@@ -661,7 +662,7 @@ const login = async (e) => {
 
   try {
     const res = await axios.post(
-      "http://localhost:8000/auth/admin-login/",
+      `${backendURL}/auth/admin-login/`,
       { username, password }
     );
 

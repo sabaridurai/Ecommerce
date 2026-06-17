@@ -198,7 +198,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 100,
+    zIndex: 9999,
     opacity: 0,
     transform: 'translateY(20px)',
     pointerEvents: 'none'
@@ -345,7 +345,7 @@ export default function ProductGrid({ products, loading = false, onLoadMore }) {
             >
               🔲
             </button>
-            <button
+            {/* <button
               style={{
                 ...styles.viewButton,
                 ...(viewMode === 'list' ? styles.viewButtonActive : {}),
@@ -365,7 +365,7 @@ export default function ProductGrid({ products, loading = false, onLoadMore }) {
               title="List view"
             >
               📋
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

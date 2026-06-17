@@ -1,3 +1,6 @@
+from datetime import timedelta
+from django.utils import timezone
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -26,6 +29,31 @@ class User(AbstractUser):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class OTPVerification(models.Model):
+    email = models.EmailField(
+        blank=True,
+        null=True
+    )
+
+    phone = models.CharField(
+        max_length=15,
+        blank=True,
+        null=True
+    )
+
+    otp = models.CharField(max_length=6)
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def is_expired(self):
+        return timezone.now() > (
+            self.created_at +
+            timedelta(minutes=5)
+        )
 
 class Product(models.Model):
     name = models.CharField(max_length=255)
@@ -70,6 +98,115 @@ class ProductImage(models.Model):
 class ProductVideo(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="videos")
     video = models.FileField(upload_to="products/videos/")
+
+
+class Payment(models.Model):
+
+    STATUS_CHOICES = (
+        ("PENDING", "Pending"),
+        ("VERIFIED", "Verified"),
+        ("REJECTED", "Rejected"),
+    )
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    session_id = models.CharField(
+        max_length=100,
+        unique=True
+    )
+
+    total_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2
+    )
+
+    payment_method = models.ForeignKey(
+        'PaymentMethod',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+
+    )
+
+    proof = models.ImageField(
+        upload_to="payment_proofs/"
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="PENDING"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+class Order(models.Model):
+
+    STATUS_CHOICES = (
+        ("PLACED", "Placed"),
+        ("PROCESSING", "Processing"),
+        ("SHIPPED", "Shipped"),
+        ("DELIVERED", "Delivered"),
+    )
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    payment = models.ForeignKey(
+        Payment,
+        on_delete=models.CASCADE
+    )
+
+    total_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2
+    )
+
+    status = models.CharField(
+        max_length=20,
+        default="PLACED"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+class OrderItem(models.Model):
+
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name="items"
+    )
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE
+    )
+
+    quantity = models.PositiveIntegerField()
+
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2
+    )
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -160,9 +297,10 @@ class PaymentHistory(models.Model):
     )
 
     payment_method = models.ForeignKey(
-        PaymentMethod,
+        'PaymentMethod',
         on_delete=models.SET_NULL,
-        null=True
+        null=True,
+        blank=True
     )
 
     amount = models.DecimalField(

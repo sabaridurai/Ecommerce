@@ -655,9 +655,9 @@ export default function Hero() {
 
           {/* TITLE */}
           <h1 style={styles.title}>
-            Elevate Your
+            Secure your Enviroment
             <br />
-            <span style={styles.titleGradient}>Shopping</span>
+            <span style={styles.titleGradient}>With our Product</span>
             <span style={styles.titleSub}>Premium luxury retail</span>
           </h1>
 

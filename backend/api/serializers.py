@@ -7,6 +7,55 @@ from .models import PaymentMethod, Product, ProductImage, ProductVideo
 User = get_user_model()
 
 
+class SendOTPSerializer(serializers.Serializer):
+
+    email = serializers.EmailField(
+        required=False
+    )
+
+    phone = serializers.CharField(
+        required=False
+    )
+
+    def validate(self, data):
+
+        if (
+            not data.get("email")
+            and
+            not data.get("phone")
+        ):
+            raise serializers.ValidationError(
+                "Email or phone required"
+            )
+
+        return data
+
+
+class VerifyOTPSerializer(serializers.Serializer):
+
+    email = serializers.EmailField(
+        required=False
+    )
+
+    phone = serializers.CharField(
+        required=False
+    )
+
+    otp = serializers.CharField()
+
+    def validate(self, data):
+
+        if (
+            not data.get("email")
+            and
+            not data.get("phone")
+        ):
+            raise serializers.ValidationError(
+                "Email or phone required"
+            )
+
+        return data
+
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 

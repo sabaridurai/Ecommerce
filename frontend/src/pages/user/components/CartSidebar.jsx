@@ -454,27 +454,28 @@ export default function CartSidebar({ open, onClose }) {
     setTotal(newTotal);
   }, [cart]);
 
-  const handleCheckout = () => {
-    setIsCheckoutActive(true);
-    setTimeout(() => setIsCheckoutActive(false), 200);
-    if (cart.length === 0) return;
-    alert(`Proceeding to payment for ₹${total}`);
+const handleCheckout = () => {
+  if (!isLoggedIn()) {
+    localStorage.setItem(
+      "redirectAfterLogin",
+      "/checkout"
+    );
+    navigate("/login");
+    return;
+  }
 
-     // 1. Check login
-      if (!isLoggedIn()) {
-        // optional: store redirect path
-        localStorage.setItem("redirectAfterLogin", "/checkout");
-    
-        navigate("/login");
-        return;
-      }
-    
-      // 2. Save selected product
-      localStorage.setItem( "buyNowProduct",JSON.stringify(cart));
-    
-      // 3. Go to checkout
-      navigate("/checkout");
-  };
+  localStorage.setItem(
+    "checkoutType",
+    "cart"
+  );
+
+  localStorage.setItem(
+    "buyNowProduct",
+    JSON.stringify(cart)
+  );
+
+  navigate("/checkout");
+};
 
   const handleQuantityChange = (itemId, newQuantity) => {
     if (newQuantity < 1) {
@@ -566,7 +567,7 @@ export default function CartSidebar({ open, onClose }) {
                     <div style={styles.itemDetails}>
                       <span style={styles.itemPrice}>₹{item.price}</span>
                       {item.category && (
-                        <span style={{ color: "rgba(255,255,255,0.3)" }}>
+                        <span style={{ color: "rgba(0, 252, 151, 0.93)" }}>
                           • {item.category}
                         </span>
                       )}
