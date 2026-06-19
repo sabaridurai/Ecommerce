@@ -35,6 +35,11 @@ This project is a full-stack application built using:
 create Database
 MySQL Database "ecommerce"
 ---
+Creating superUser(admin)
+**commands**:
+venv/Scripts/activate   
+python manage.py createsuperuser**
+
 
 # 📦 Setup Instructions
 
