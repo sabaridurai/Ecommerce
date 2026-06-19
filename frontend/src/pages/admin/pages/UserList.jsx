@@ -482,8 +482,6 @@ export default function Users() {
   const getRoleStyle = (role) => {
     const roleMap = {
       "ADMIN": styles.roleAdmin,
-      "MODERATOR": styles.roleModerator,
-      "SELLER": styles.roleSeller,
       "USER": styles.roleUser,
     };
     return roleMap[role?.toUpperCase()] || styles.roleDefault;
@@ -771,7 +769,7 @@ export default function Users() {
                               }}
                               onMouseEnter={() => setHoveredAction(`view-${u.id}`)}
                               onMouseLeave={() => setHoveredAction(null)}
-                              onClick={() => navigate(`/users/${u.id}`)}
+                              onClick={() => alert('functions are not implemented')}
                             >
                               👁️ View
                             </button>
@@ -784,8 +782,8 @@ export default function Users() {
                               onMouseEnter={() => setHoveredAction(`delete-${u.id}`)}
                               onMouseLeave={() => setHoveredAction(null)}
                               onClick={() => {
-                                if (window.confirm(`Delete user ${u.username}?`)) {
-                                  console.log("Delete user:", u.id);
+                                if (window.confirm(`Deleting user: ${u.username} funciton is not implemented`)) {
+                                  // console.log("Delete user:", u.id);
                                 }
                               }}
                             >

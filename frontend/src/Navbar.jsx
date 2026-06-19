@@ -409,7 +409,7 @@ export default function Navbar({ onCartClick }) {
         onClick={handleLogoClick}
       >
         <span style={styles.logoIcon}>🛡️</span>
-        <span style={styles.logoText}>SecureTech</span>
+        <span style={styles.logoText}>ABC-Tech</span>
         <span style={styles.logoBadge}>PRO</span>
       </div>
 

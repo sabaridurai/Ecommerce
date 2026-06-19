@@ -931,9 +931,9 @@ export default function AllOrders() {
                           </td>
 
                           <td style={styles.td}>
-                            <span style={styles.itemsBadge}>
+                            {/* <span style={styles.itemsBadge}>
                               🛍️ {itemCount} item{itemCount !== 1 ? "s" : ""}
-                            </span>
+                            </span> */}
                             <div style={styles.productImages}>
                               {firstItems.map((item, idx) => (
                                 <img
@@ -977,7 +977,7 @@ export default function AllOrders() {
                                 }}
                                 onMouseEnter={() => setHoveredAction(`view-${order.id}`)}
                                 onMouseLeave={() => setHoveredAction(null)}
-                                onClick={() => navigate(`/orders/${order.id}`)}
+                                onClick={() =>alert('Functions are not implmented')}
                               >
                                 👁️ View
                               </button>

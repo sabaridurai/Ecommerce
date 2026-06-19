@@ -548,6 +548,7 @@ export default function Dashboard() {
     setLoading(true);
     try {
       const res = await api.get(`${backendURL}/dashboard/`);
+      console.log("dashboardData",res.data)
       setData(res.data);
     } catch (err) {
       console.error("Failed to fetch dashboard:", err);
@@ -708,8 +709,9 @@ export default function Dashboard() {
           {[
             { key: "users", icon: "👥", label: "Total Users", value: summaryData.users, sub: "Active users" },
             { key: "orders", icon: "📦", label: "Total Orders", value: summaryData.orders, sub: "All time orders" },
+             { key: "Products", icon: "🛍️", label: "Total Products", value: summaryData.total_product, sub: "Active users" },
             { key: "payments", icon: "💳", label: "Total Payments", value: summaryData.payments, sub: "Successful payments" },
-            { key: "revenue", icon: "💰", label: "Total Revenue", value: `₹${formatAmount(summaryData.revenue)}`, sub: "From all orders" },
+            { key: "revenue", icon: "💰", label: "Total Revenue", value: `₹${formatAmount(summaryData.revenue)} `, sub: "From all orders" },
           ].map((item, index) => (
             <div
               key={item.key}
@@ -725,7 +727,11 @@ export default function Dashboard() {
               <div style={styles.summaryCardGlow} />
               <span style={styles.summaryIcon}>{item.icon}</span>
               <p style={styles.summaryLabel}>{item.label}</p>
-              <p style={styles.summaryValue}>{item.value}</p>
+              <p style={styles.summaryValue}>
+  {item.label === "Total Revenue" &&   parseFloat(item.value) === 0
+    ? "Unverified Payments"
+    : item.value}
+</p>
               <p style={styles.summarySub}>{item.sub}</p>
               <div style={{
                 ...styles.summaryTrend,

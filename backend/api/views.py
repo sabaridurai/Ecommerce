@@ -527,6 +527,7 @@ class UploadPaymentProofView(APIView):
                 "total_amount": total_amount,
                 "payment_method_id": payment_method_id,
                 "proof": proof,
+                
             }
         )
 
@@ -558,7 +559,24 @@ class UploadPaymentProofView(APIView):
             "message": "Payment proof uploaded successfully"
         })
 
+class VerifyPaymentView(APIView):
 
+    def patch(self, request, pk):
+        try:
+            payment = Payment.objects.get(id=pk)
+
+            payment.status = "VERIFIED"
+            payment.save()
+
+            return Response({
+                "message": "Payment verified successfully"
+            })
+
+        except Payment.DoesNotExist:
+            return Response(
+                {"error": "Payment not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
 
 
@@ -783,6 +801,7 @@ class AdminDashboardHomeView(APIView):
         total_users = User.objects.count()
         total_orders = Order.objects.count()
         total_payments = Payment.objects.count()
+        total_product=Product.objects.count()
 
         # =========================
         # REVENUE
@@ -851,6 +870,7 @@ class AdminDashboardHomeView(APIView):
                 "orders": total_orders,
                 "payments": total_payments,
                 "revenue": float(total_revenue),
+                "total_product":total_product
             },
 
             "recent_orders": orders_data,
@@ -862,6 +882,17 @@ class AdminDashboardHomeView(APIView):
 
 
 
+
+class SidebarCountsView(APIView):
+
+    def get(self, request):
+        return Response({
+            "users": User.objects.count(),
+            "orders": Order.objects.count(),
+            "payments": Payment.objects.count(),
+            "products": Product.objects.count(),
+            "paymentMethods": PaymentMethod.objects.count(),
+        })
 
 
 #  for admin payment detils

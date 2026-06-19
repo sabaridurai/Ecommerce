@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import api from "../../../services/api";
+
 
 const css = `
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
@@ -361,110 +363,199 @@ const css = `
 .sb-root.collapsed .sb-user-arrow { opacity: 0; width: 0; overflow: hidden; }
 `;
 
-const NAV = [
-  {
-    section: "Main",
-    items: [
-      { to: "/admin/dashboard", icon: "🏠", label: "Dashboard", badge: null },
-    //   { to: "/admin/analytics", icon: "📊", label: "Analytics",  badge: null },
-    ],
-  },
-  {
-    section: "Catalog",
-    items: [
-      { to: "/admin/products",  icon: "📦", label: "Products",  badge: null, badgeType: "" },
-      { to: "/admin/ordersList", icon: "🗄️", label: "Orders",  badge: null },
-      { to: "/admin/paymentsList",icon: "🏷️", label: "Payments", badge: null },
-      { to: "/admin/usersList",icon: "👥", label: "Users", badge: null },
-    ],
-  },
-  {
-    section: "Finance",
-    items: [
-      {  to: "/admin/payments",  icon: "💳",  label: "Payment Methods",  badge: "3",  badgeType: "green"},
-      // { to: "/admin/paymentHistory",    icon: "🧾", label: "Payment History",    badge: "12", badgeType: "green" },
-    //   { to: "/admin/refunds",   icon: "↩️",  label: "Refunds",   badge: null },
-    ],
-  },
-  // {
-  //   section: "System",
-  //   items: [
-  //   //   { to: "/admin/users",     icon: "👥", label: "Users",     badge: null },
-  //     { to: "/admin/settings",  icon: "⚙️", label: "Settings",  badge: null },
-  //   //   { to: "/admin/logs",      icon: "📋", label: "Audit Logs", badge: null },
-  //   ],
-  // },
-];
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
 
+  const [summary, setSummary] = useState({
+    users: 0,
+    orders: 0,
+    payments: 0,
+  });
+
+  useEffect(() => {
+    loadDashboardSummary();
+  }, []);
+
+  const loadDashboardSummary = async () => {
+    try {
+      const res = await api.get("sidebar-counts/");
+
+      console.log("count",res.data)
+      setSummary({
+        users: res.data.users,
+        orders: res.data.orders,
+        payments: res.data.payments,
+        paymentMethods:res.data.paymentMethods,
+        products:res.data.products,
+      });
+    } catch (error) {
+      console.error(
+        "Failed to load sidebar counts",
+        error
+      );
+    }
+  };
+
+  const NAV = [
+    {
+      section: "Main",
+      items: [
+        {
+          to: "/admin/dashboard",
+          icon: "🏠",
+          label: "Dashboard",
+          
+        },
+      ],
+    },
+
+    {
+      section: "Catalog",
+      items: [
+        {
+          to: "/admin/products",
+          icon: "📦",
+          label: "Products",
+           badge: summary.products,
+        },
+
+        {
+          to: "/admin/ordersList",
+          icon: "🗄️",
+          label: "Orders",
+          badge: summary.orders,
+        },
+
+        {
+          to: "/admin/paymentsList",
+          icon: "🏷️",
+          label: "Payments",
+          badge: summary.payments,
+        },
+
+        {
+          to: "/admin/usersList",
+          icon: "👥",
+          label: "Users",
+          badge: summary.users,
+        },
+      ],
+    },
+
+    {
+      section: "Finance",
+      items: [
+        {
+          to: "/admin/payments",
+          icon: "💳",
+          label: "Payment Methods",
+          badge: summary.paymentMethods,
+        },
+      ],
+    },
+  ];
+
   return (
-    <>
-      <style>{css}</style>
-      <aside className={`sb-root${collapsed ? " collapsed" : ""}`}>
+ <>
+    <style>{css}</style>
+    <aside
+      className={`sb-root ${
+        collapsed ? "collapsed" : ""
+      }`}
+    >
+      {/* BRAND */}
+      <div className="sb-brand">
+        <div
+          className="sb-logo"
+          onClick={() =>
+            setCollapsed((v) => !v)
+          }
+        >
+          🌐
+        </div>
 
-        {/* ── Brand ── */}
-        <div className="sb-brand">
-         
-         
-          <div className="sb-logo" 
-           onClick={() => setCollapsed(v => !v)}
-           >🌐</div>
-          {!collapsed && (
-            <div className="sb-brand-text"  onClick={() => setCollapsed(v => !v)}>
-              <div className="sb-brand-name">Admin</div>
-              <div className="sb-brand-tag">Control Center</div>
-            </div>
-          )}
-          {/* <button
-            className="sb-collapse-btn"
-            onClick={() => setCollapsed(v => !v)}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        {!collapsed && (
+          <div
+            className="sb-brand-text"
+            onClick={() =>
+              setCollapsed((v) => !v)
+            }
           >
-            ◀
-          </button> */}
-        </div>
+            <div className="sb-brand-name">
+              Admin
+            </div>
 
-        {/* ── Status ── */}
-        <div className="sb-status">
-          <div className="sb-status-dot" />
-          {!collapsed && <span className="sb-status-text">System · Online</span>}
-        </div>
-
-        {/* ── Nav sections ── */}
-        {NAV.map((group, gi) => (
-          <div className="sb-section" key={gi}>
-            <div className="sb-section-label">{group.section}</div>
-            {group.items.map((item) => {
-              const active = location.pathname === item.to;
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className={`sb-nav-item${active ? " active" : ""}`}
-                >
-                  <div className="sb-nav-icon">{item.icon}</div>
-                  <span className="sb-nav-label">{item.label}</span>
-                  {item.badge && (
-                    <span className={`sb-badge${item.badgeType ? " " + item.badgeType : ""}`}>
-                      {item.badge}
-                    </span>
-                  )}
-                  <span className="sb-tooltip">{item.label}</span>
-                </Link>
-              );
-            })}
-            {gi < NAV.length - 1 && <div className="sb-divider" />}
+            <div className="sb-brand-tag">
+              Control Center
+            </div>
           </div>
-        ))}
+        )}
+      </div>
 
-        <div className="sb-spacer" />
+      {/* STATUS */}
+      <div className="sb-status">
+        <div className="sb-status-dot" />
 
-        
+        {!collapsed && (
+          <span className="sb-status-text">
+            System · Online
+          </span>
+        )}
+      </div>
 
-      </aside>
+      {/* NAVIGATION */}
+      {NAV.map((group, gi) => (
+        <div
+          className="sb-section"
+          key={gi}
+        >
+          <div className="sb-section-label">
+            {group.section}
+          </div>
+
+          {group.items.map((item) => {
+            const active =
+              location.pathname === item.to;
+
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={`sb-nav-item ${
+                  active ? "active" : ""
+                }`}
+              >
+                <div className="sb-nav-icon">
+                  {item.icon}
+                </div>
+
+                <span className="sb-nav-label">
+                  {item.label}
+                </span>
+
+                {item.badge !== undefined && (
+                  <span className="sb-badge">
+                    {item.badge}
+                  </span>
+                )}
+
+                <span className="sb-tooltip">
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
+
+          {gi < NAV.length - 1 && (
+            <div className="sb-divider" />
+          )}
+        </div>
+      ))}
+
+      <div className="sb-spacer" />
+    </aside>
     </>
   );
 }

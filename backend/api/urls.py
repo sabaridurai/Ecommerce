@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import (AdminLoginView,AdminOrderListView,AdminDashboardHomeView,AdminPaymentListView,AdminUserListView, OrderListView, PaymentMethodDetailView, PaymentMethodListCreateView, ProductCreateView, ProductDetailView, ProductListView,RegisterView, LoginView, MeView, SendOTPView, UploadPaymentProofView, VerifyOTPView)
+from .views import (AdminLoginView,VerifyPaymentView,SidebarCountsView,AdminOrderListView,AdminDashboardHomeView,AdminPaymentListView,AdminUserListView, OrderListView, PaymentMethodDetailView, PaymentMethodListCreateView, ProductCreateView, ProductDetailView, ProductListView,RegisterView, LoginView, MeView, SendOTPView, UploadPaymentProofView, VerifyOTPView)
 
 urlpatterns = [
 
@@ -16,6 +16,16 @@ urlpatterns = [
     path("paymentsList/", AdminPaymentListView.as_view()),
     path("usersList/", AdminUserListView.as_view()),
     path("dashboard/", AdminDashboardHomeView.as_view()),
+    path(
+    "sidebar-counts/",
+    SidebarCountsView.as_view()
+),
+
+path(
+    "payments/<int:pk>/verify/",
+    VerifyPaymentView.as_view(),
+    name="verify-payment"
+),
 
 
 # for admin payment detils

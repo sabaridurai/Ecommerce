@@ -655,13 +655,16 @@ const navigate = useNavigate();
 
 const handleBuyNow_card = (product) => {
 
-    setIsCheckoutActive(true);
+    
     setTimeout(() => setIsCheckoutActive(false), 200);
   if (!isLoggedIn()) {
     localStorage.setItem("redirectAfterLogin", "/checkout");
+   alert("Please sign in before purchasing.");
     navigate("/login");
     return;
   }
+
+  setIsCheckoutActive(true);
 
   localStorage.setItem("checkoutType", "buyNow");
   localStorage.setItem("buyNowProduct", JSON.stringify(product));

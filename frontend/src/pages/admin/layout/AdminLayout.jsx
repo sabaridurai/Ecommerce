@@ -69,6 +69,5 @@ const styles = {
   content: {
     flex: 1,
     overflowY: "auto", // ONLY THIS SCROLLS
-    padding: "20px",
   },
 };

@@ -620,7 +620,7 @@ export default function PaymentsList() {
   const paginatedPayments = filteredPayments.slice(startIndex, startIndex + itemsPerPage);
 
   // Calculate summary
-  const totalAmount = payments.reduce((sum, p) => sum + Number(p.total_amount || 0), 0);
+  const totalAmount = payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
   const completedPayments = payments.filter(p => p.status?.toUpperCase() === "COMPLETED").length;
   const pendingPayments = payments.filter(p => 
     ["PENDING", "PENDING_PAYMENT", "AWAITING_PROOF"].includes(p.status?.toUpperCase())
@@ -654,6 +654,10 @@ export default function PaymentsList() {
 
   return (
     <div style={styles.container}>
+
+
+
+      
       <div style={styles.wrapper}>
         {/* Header */}
         <div style={styles.header}>
@@ -779,7 +783,7 @@ export default function PaymentsList() {
                         <td style={styles.td}>
                           <p style={styles.amount}>
                             <span style={styles.amountPrefix}>₹</span>
-                            {formatAmount(p.total_amount)}
+                            {formatAmount(p.amount)}
                           </p>
                         </td>
 
@@ -836,11 +840,11 @@ export default function PaymentsList() {
                               }}
                               onMouseEnter={() => setHoveredAction(`view-${p.id}`)}
                               onMouseLeave={() => setHoveredAction(null)}
-                              onClick={() => navigate(`/payments/${p.id}`)}
+                              onClick={() => alert('Functions are not implmented')}
                             >
                               👁️ View
                             </button>
-                            {p.status?.toUpperCase() === "AWAITING_PROOF" && (
+                            {p.status?.toUpperCase() === "PENDING" && (
                               <button
                                 style={{
                                   ...styles.actionButton,
@@ -849,11 +853,27 @@ export default function PaymentsList() {
                                 }}
                                 onMouseEnter={() => setHoveredAction(`verify-${p.id}`)}
                                 onMouseLeave={() => setHoveredAction(null)}
-                                onClick={() => {
-                                  if (window.confirm("Verify this payment?")) {
-                                    console.log("Verify payment:", p.id);
-                                  }
-                                }}
+                                onClick={async () => {
+                                 if (window.confirm("Verify this payment?")) {
+                                    try {
+                                    await api.patch(
+                                    `/payments/${p.id}/verify/`
+                                    );
+
+                                    alert("Payment verified successfully");
+
+                                    fetchPayments(); // refresh table
+
+                                    } catch (error) {
+                                    console.error(error);
+
+                                    alert("Failed to verify payment");
+                                    }
+                                    }
+                                }
+                              
+                              
+                              }
                               >
                                 ✅ Verify
                               </button>
