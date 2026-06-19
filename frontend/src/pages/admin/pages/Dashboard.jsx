@@ -876,7 +876,7 @@ export default function Dashboard() {
               <h3 style={styles.activityTitle}>🕐 Recent Orders</h3>
               <span 
                 style={styles.viewAllLink}
-                onClick={() => navigate("/orders")}
+                onClick={() => navigate("/admin/ordersList")}
                 onMouseEnter={(e) => e.target.style.color = "#a8b5ff"}
                 onMouseLeave={(e) => e.target.style.color = "rgba(102,126,234,0.6)"}
               >
@@ -924,7 +924,7 @@ export default function Dashboard() {
               <h3 style={styles.activityTitle}>💳 Recent Payments</h3>
               <span 
                 style={styles.viewAllLink}
-                onClick={() => navigate("/payments")}
+                onClick={() => navigate("/admin/paymentsList")}
                 onMouseEnter={(e) => e.target.style.color = "#a8b5ff"}
                 onMouseLeave={(e) => e.target.style.color = "rgba(102,126,234,0.6)"}
               >

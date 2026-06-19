@@ -12,6 +12,50 @@ import Footer from "../../../Footer";
 
 // Professional Dark Theme Styles with Enhanced Responsiveness
 const styles = {
+
+
+
+  popupOverlay: {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100%",
+  height: "100%",
+  background: "rgba(0,0,0,0.6)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 99999,
+},
+
+popupCard: {
+  background: "#fff",
+  padding: "30px",
+  borderRadius: "12px",
+  width: "90%",
+  maxWidth: "400px",
+  boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+},
+
+input: {
+  width: "100%",
+  padding: "12px",
+  marginBottom: "15px",
+  border: "1px solid #ddd",
+  borderRadius: "8px",
+  fontSize: "14px",
+},
+
+button: {
+  width: "100%",
+  padding: "12px",
+  border: "none",
+  borderRadius: "8px",
+  background: "#667eea",
+  color: "#fff",
+  fontWeight: "600",
+  cursor: "pointer",
+},
 appContainer: {
   height: "100dvh", 
   width: "100%",
@@ -80,7 +124,7 @@ appContainer: {
     overflowY: "auto",
     position: 'relative',
     zIndex: 1,
-    padding: '0 20px 20px',
+    // padding: '0 20px 20px',
     
     // Responsive padding
     '@media (min-width: 640px)': {
@@ -240,7 +284,7 @@ appContainer: {
   },
   scrollText: {
     fontSize: '11px',
-    color: 'rgba(255, 255, 255, 0.2)',
+    color: 'rgb(255, 255, 255)',
     letterSpacing: '2px',
     textTransform: 'uppercase'
   }
@@ -373,6 +417,29 @@ export default function UserLanding() {
   const [cartOpen, setCartOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [showUserPopup, setShowUserPopup] = useState(false);
+const [username, setUsername] = useState("");
+const [email, setEmail] = useState("");
+
+useEffect(() => {
+  loadProducts();
+
+  const storedUsername = localStorage.getItem("username");
+  const storedEmail = localStorage.getItem("email");
+
+  if (!storedUsername || !storedEmail) {
+    setShowUserPopup(true);
+  }
+
+  const handleResize = () => {
+    setIsMobile(window.innerWidth <= 768);
+  };
+
+  handleResize();
+  window.addEventListener("resize", handleResize);
+
+  return () => window.removeEventListener("resize", handleResize);
+}, []);
 
   useEffect(() => {
     loadProducts();
@@ -387,6 +454,44 @@ export default function UserLanding() {
     
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+
+
+
+const handleUserSubmit = () => {
+  if (!username.trim() || !email.trim()) {
+    alert("Please enter username and email");
+    return;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailRegex.test(email)) {
+    alert("Please enter a valid email");
+    return;
+  }
+
+  localStorage.setItem("username", username);
+  localStorage.setItem("email", email);
+
+  setShowUserPopup(false);
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   const loadProducts = async () => {
     try {

@@ -70,6 +70,7 @@ class SendOTPView(APIView):
                 999999
             )
         )
+        print("OTP is ",otp)
 
         # remove old otp
         if email:
@@ -172,6 +173,8 @@ class SendOTPView(APIView):
                 },
                 status=500
             )
+
+
 
 
 

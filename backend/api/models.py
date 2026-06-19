@@ -31,6 +31,10 @@ class User(AbstractUser):
     updated_at = models.DateTimeField(auto_now=True)
 
 
+
+
+
+
 class OTPVerification(models.Model):
     email = models.EmailField(
         blank=True,

@@ -658,12 +658,12 @@ export default function Hero() {
             Secure your Enviroment
             <br />
             <span style={styles.titleGradient}>With our Product</span>
-            <span style={styles.titleSub}>Premium luxury retail</span>
+            <span style={styles.titleSub}>High End Security</span>
           </h1>
 
           {/* DESCRIPTION - Shorter */}
           <p style={styles.description}>
-            Curated collections with seamless checkout and world-class support.
+            Security & Safety is our priority
           </p>
 
           {/* FEATURES - Only 2 items */}
@@ -766,7 +766,7 @@ export default function Hero() {
             {/* Product Showcase */}
             <div style={styles.productShowcase}>
               <div style={styles.productIconWrapper}>
-                <div style={styles.productIcon}>🛒</div>
+                <div style={styles.productIcon}>🛡️</div>
 
                 {/* Floating Particles - Reduced count */}
                 <div
@@ -787,7 +787,7 @@ export default function Hero() {
                     bottom: "15%",
                     right: "5%",
                     animationDelay: "1s",
-                    background: "rgba(255,70,180,0.3)",
+                    background: "rgb(255, 70, 181)",
                   }}
                 />
                 <div
@@ -798,16 +798,16 @@ export default function Hero() {
                     top: "20%",
                     right: "8%",
                     animationDelay: "2s",
-                    background: "rgba(0,200,255,0.2)",
+                    background: "rgb(0, 177, 226)",
                   }}
                 />
               </div>
 
               {/* Product Info */}
               <div style={styles.productInfo}>
-                <h3 style={styles.productTitle}>Luxury Collection</h3>
+                <h3 style={styles.productTitle}>ISO standard &  Approved Product</h3>
                 <p style={styles.productSubtitle}>
-                  Premium goods for the modern connoisseur
+                  Premium Products for the modern World
                 </p>
                 <div style={styles.decorativeLine} />
               </div>
